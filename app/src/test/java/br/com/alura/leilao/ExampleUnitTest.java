@@ -1,3 +1,4 @@
+
 package br.com.alura.leilao;
 
 import org.junit.Test;
