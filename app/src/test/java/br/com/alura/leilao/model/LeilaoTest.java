@@ -2,12 +2,21 @@ package br.com.alura.leilao.model;
 
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 public class LeilaoTest {
 
+    public static final double DELTA = 0.0001;
+
+    //poderia ter criado um atributo de classe do tipo Leilao e utilizado ele pra todos testes
+    //cada vez que rodamos um teste, ele cria nova instância da classe, sendo assim um teste não afeta outro teste
+    //se fosse uma instância estática, daria erro pois seria utilizada a mesma referência para todos os testes
+
+
     @Test
-    public void getDescricao() {
+    public void getDescricao_QuandoRecebeDescricao_DevolveDescricao() {
         //criar cenário de teste
         Leilao console = new Leilao("Console");
 
@@ -19,7 +28,7 @@ public class LeilaoTest {
     }
 
     @Test
-    public void getMaiorLance() {
+    public void getMaiorLance_QuandoRecebeApenasUmLance() {
         //criando cenário
         Leilao console = new Leilao("Console");
         console.propoe(new Lance(new Usuario("Alex"), 200.0));
@@ -30,7 +39,119 @@ public class LeilaoTest {
         //testando se o retorno é o mesmo que era esperado
         //como é uma comparação entre double, precisamos usar o terceiro parâmetro "delta"
         //delta padrão = 0.0001
-        assertEquals(200.0, maiorLanceDevolvido, 0.0001);
+        assertEquals(200.0, maiorLanceDevolvido, DELTA);
 
     }
+
+    @Test
+    public void getMaiorLance_RecebeValoresEmOrdemCrescente_DevolveMaiorLance() {
+        Leilao videogame = new Leilao("videogame");
+        videogame.propoe(new Lance(new Usuario("Tília"), 100.0));
+        videogame.propoe(new Lance(new Usuario("Rapha"), 130.0));
+        videogame.propoe(new Lance(new Usuario("Dude"), 135.0));
+        double maiorValorDevolvido = videogame.getMaiorLance();
+        assertEquals(135.0, maiorValorDevolvido, DELTA);
+    }
+
+    @Test
+    public void deve_DevolverMaiorLance_QuandoRecebeLancesEmOrdemDecrescente() {
+        Leilao bolo = new Leilao("bolo de chocolate");
+        bolo.propoe(new Lance(new Usuario("Livia"), 15.0));
+        bolo.propoe(new Lance(new Usuario("Tilia"), 10.0));
+        double maiorValorDevolvido = bolo.getMaiorLance();
+        assertEquals(15.0, maiorValorDevolvido, DELTA);
+    }
+
+    @Test
+    public void deve_DevolverMenorLance_QuandoRecebeUnicoLance() {
+        Leilao brigadeiro = new Leilao("brigadeiro");
+        brigadeiro.propoe(new Lance(new Usuario("Tilia"), 5.0));
+        double menorLanceDevolvido = brigadeiro.getMenorLance();
+        assertEquals(5.0, menorLanceDevolvido, DELTA);
+    }
+
+    @Test
+    public void deve_DevolverMenorLance_QuandoRecebeLancesEmOrdemCrescente() {
+        Leilao cheesecake = new Leilao("cheesecake");
+        cheesecake.propoe(new Lance(new Usuario("Alê"), 500.0));
+        cheesecake.propoe(new Lance(new Usuario("Genja"), 600.0));
+        double valorMenorLanceCheesecake = cheesecake.getMenorLance();
+        assertEquals(500.0, valorMenorLanceCheesecake, DELTA);
+    }
+
+    @Test
+    public void deve_DevolverMenorLance_QuandoRecebeLancesEmOrdemDecrescente() {
+        Leilao cheesecake = new Leilao("cheesecake");
+        cheesecake.propoe(new Lance(new Usuario("Alê"), 500.0));
+        cheesecake.propoe(new Lance(new Usuario("Genja"), 400.0));
+        double valorMenorLanceCheesecake = cheesecake.getMenorLance();
+        assertEquals(400.0, valorMenorLanceCheesecake, DELTA);
+    }
+
+    @Test
+    public void deve_DevolverTresMaioresLances_QuandoRecebeTresLances() {
+        Leilao cheesecake = new Leilao("cheesecake");
+        cheesecake.propoe(new Lance(new Usuario("Fofa"), 500.0));
+        cheesecake.propoe(new Lance(new Usuario("Genja"), 450.0));
+        cheesecake.propoe(new Lance(new Usuario("Genja"), 480.0));
+
+        List<Lance> tresMaioresLancesDevolvidos = cheesecake.tresMaioresLances();
+
+        //verificando se devolve 3 números
+        assertEquals(3, tresMaioresLancesDevolvidos.size());
+
+        //verificando o valor que se encontra em cada índice da lista levando em considereção que deve ser em ordem decrescente
+        assertEquals(500.0, tresMaioresLancesDevolvidos.get(0).getValor(), DELTA);
+        assertEquals(480.0, tresMaioresLancesDevolvidos.get(1).getValor(), DELTA);
+        assertEquals(450.0, tresMaioresLancesDevolvidos.get(2).getValor(), DELTA);
+
+    }
+
+    @Test
+    public void deve_DevolverTresMaioresLances_QuandoNaoRecebeLances() {
+        Leilao cheesecake = new Leilao("cheesecake");
+        List<Lance> lancesDevolvidos = cheesecake.tresMaioresLances();
+        assertEquals(0, lancesDevolvidos.size(), DELTA);
+    }
+
+    @Test
+    public void deve_DevolverTresMaioresLances_QuandoRecebeApenasUmLance() {
+        Leilao videogame = new Leilao("videogame");
+        videogame.propoe(new Lance(new Usuario("Tília"), 100.0));
+
+        List<Lance> lancesDevolvidos = videogame.tresMaioresLances();
+        assertEquals(1, lancesDevolvidos.size());
+        assertEquals(100.0, lancesDevolvidos.get(0).getValor(), DELTA);
+    }
+
+    @Test
+    public void deve_DevolverTresMaioresLances_QuandoRecebeApenasDoisLances() {
+        Leilao bolo = new Leilao("bolo de chocolate");
+        bolo.propoe(new Lance(new Usuario("Livia"), 15.0));
+        bolo.propoe(new Lance(new Usuario("Tilia"), 10.0));
+
+        List<Lance> lancesDevolvidos = bolo.tresMaioresLances();
+        assertEquals(2, lancesDevolvidos.size());
+        assertEquals(15.0, lancesDevolvidos.get(0).getValor(), DELTA);
+        assertEquals(10.0, lancesDevolvidos.get(1).getValor(), DELTA);
+    }
+
+    @Test
+    public void deve_DevolverTresMaioresLances_QuandoRecebeMaisDeTresLances() {
+        Leilao bolo = new Leilao("bolo de chocolate");
+        bolo.propoe(new Lance(new Usuario("Livia"), 15.0));
+        bolo.propoe(new Lance(new Usuario("Tilia"), 10.0));
+        bolo.propoe(new Lance(new Usuario("Dude"), 12.0));
+        bolo.propoe(new Lance(new Usuario("Rapha"), 17.0));
+        bolo.propoe(new Lance(new Usuario("Milaide"), 18.0));
+
+        final List<Lance> lancesDevolvidos = bolo.tresMaioresLances();
+
+        assertEquals(3, lancesDevolvidos.size());
+        assertEquals(18.0, lancesDevolvidos.get(0).getValor(), DELTA);
+        assertEquals(17.0, lancesDevolvidos.get(1).getValor(), DELTA);
+        assertEquals(15.0, lancesDevolvidos.get(2).getValor(), DELTA);
+
+    }
+
 }
