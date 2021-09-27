@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 public class LeilaoTest {
 
     public static final double DELTA = 0.0001;
+    public static final Leilao SONHO = new Leilao("sonho");
 
     //poderia ter criado um atributo de classe do tipo Leilao e utilizado ele pra todos testes
     //cada vez que rodamos um teste, ele cria nova instância da classe, sendo assim um teste não afeta outro teste
@@ -53,14 +54,15 @@ public class LeilaoTest {
         assertEquals(135.0, maiorValorDevolvido, DELTA);
     }
 
-    @Test
-    public void deve_DevolverMaiorLance_QuandoRecebeLancesEmOrdemDecrescente() {
-        Leilao bolo = new Leilao("bolo de chocolate");
-        bolo.propoe(new Lance(new Usuario("Livia"), 15.0));
-        bolo.propoe(new Lance(new Usuario("Tilia"), 10.0));
-        double maiorValorDevolvido = bolo.getMaiorLance();
-        assertEquals(15.0, maiorValorDevolvido, DELTA);
-    }
+    //teste obsoleto pois o teste que verifica se é permitido dar lances menores que o maiorLance cobre o mesmo cenário
+//    @Test
+//    public void deve_DevolverMaiorLance_QuandoRecebeLancesEmOrdemDecrescente() {
+//        Leilao bolo = new Leilao("bolo de chocolate");
+//        bolo.propoe(new Lance(new Usuario("Livia"), 15.0));
+//        bolo.propoe(new Lance(new Usuario("Tilia"), 10.0));
+//        double maiorValorDevolvido = bolo.getMaiorLance();
+//        assertEquals(15.0, maiorValorDevolvido, DELTA);
+//    }
 
     @Test
     public void deve_DevolverMenorLance_QuandoRecebeUnicoLance() {
@@ -151,6 +153,59 @@ public class LeilaoTest {
         assertEquals(18.0, lancesDevolvidos.get(0).getValor(), DELTA);
         assertEquals(17.0, lancesDevolvidos.get(1).getValor(), DELTA);
         assertEquals(15.0, lancesDevolvidos.get(2).getValor(), DELTA);
+    }
+
+    @Test
+    public void deve_DevolverValorZeroParaMaiorLance_QuandoNaoTemLances() {
+        double maiorLanceDevolvido = SONHO.getMaiorLance();
+        assertEquals(0.0, maiorLanceDevolvido, DELTA);
+    }
+
+    @Test
+    public void deve_DevolverValorZeroParaMenorLance_QuandoNaoTemLances() {
+        double menorLanceDevolvido = SONHO.getMenorLance();
+        assertEquals(0.0, menorLanceDevolvido, DELTA);
+    }
+
+    @Test
+    public void naoDeve_AdcionarLance_QuandoForMenorQueMaiorLance() {
+        SONHO.propoe(new Lance(new Usuario("Milaide"), 38.0));
+        SONHO.propoe(new Lance(new Usuario("Due"), 28.0));
+
+        int quantidadeDevolvida = SONHO.quantidadeLances();
+        assertEquals(1, quantidadeDevolvida);
+    }
+
+    @Test
+    public void naoDeve_AdicionarLance_QuandoForOMesmoUsuarioDoUltimoLance(){
+        Usuario Milaide = new Usuario("Milaide");
+        SONHO.propoe(new Lance(Milaide, 38.0));
+        SONHO.propoe(new Lance(new Usuario("Milaide"), 38.0));
+
+        int quantidadeDeLances = SONHO.quantidadeLances();
+
+        assertEquals(1, quantidadeDeLances);
+    }
+
+    @Test
+    public void naoDeve_AdicionarLance_QuandoUsuarioDerCincoLances(){
+        SONHO.propoe(new Lance(new Usuario("Milaide"), 100.0));
+        SONHO.propoe(new Lance(new Usuario("Junio"), 200.0));
+        SONHO.propoe(new Lance(new Usuario("Milaide"), 300.0));
+        SONHO.propoe(new Lance(new Usuario("Junio"), 400.0));
+        SONHO.propoe(new Lance(new Usuario("Milaide"), 500.0));
+        SONHO.propoe(new Lance(new Usuario("Junio"), 600.0));
+        SONHO.propoe(new Lance(new Usuario("Milaide"), 700.0));
+        SONHO.propoe(new Lance(new Usuario("Junio"), 800.0));
+        SONHO.propoe(new Lance(new Usuario("Milaide"), 900.0));
+        SONHO.propoe(new Lance(new Usuario("Junio"), 1000.0));
+        SONHO.propoe(new Lance(new Usuario("Milaide"), 1100.0));
+        SONHO.propoe(new Lance(new Usuario("Junio"), 1200.0));
+
+        int quantidadeDeLances = SONHO.quantidadeLances();
+
+        assertEquals(10, quantidadeDeLances);
+
 
     }
 
