@@ -7,6 +7,8 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.*;
 
 /**
@@ -22,5 +24,11 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getTargetContext();
 
         assertEquals("br.com.alura.leilao", appContext.getPackageName());
+
+        assertThat(5+5, equalTo(10));
+
+
+        //para valores com ponto flutuante:
+        assertThat(4.1 + 5.3, closeTo(4.4 + 5.0, 0.0001));
     }
 }

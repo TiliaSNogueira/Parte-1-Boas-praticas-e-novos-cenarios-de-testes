@@ -1,12 +1,25 @@
 package br.com.alura.leilao.model;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.List;
 
+import br.com.alura.leilao.exception.LanceMenorQueUltimoLanceException;
+import br.com.alura.leilao.exception.LanceSeguidoDoMesmoUsuarioException;
+import br.com.alura.leilao.exception.UsuarioJaDeuCincoLancesException;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class LeilaoTest {
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
     public static final double DELTA = 0.0001;
     public static final Leilao SONHO = new Leilao("sonho");
@@ -25,7 +38,12 @@ public class LeilaoTest {
         String descricaoDevolvida = console.getDescricao();
 
         //testar resultado esperado
-        assertEquals("Console", descricaoDevolvida);
+//        assertEquals("Console", descricaoDevolvida);
+
+        //três maneiras de fazer:
+        assertThat(descricaoDevolvida, equalTo("Console"));
+        assertThat(descricaoDevolvida, is(equalTo("Console")));
+
     }
 
     @Test
@@ -54,22 +72,14 @@ public class LeilaoTest {
         assertEquals(135.0, maiorValorDevolvido, DELTA);
     }
 
-    //teste obsoleto pois o teste que verifica se é permitido dar lances menores que o maiorLance cobre o mesmo cenário
-//    @Test
-//    public void deve_DevolverMaiorLance_QuandoRecebeLancesEmOrdemDecrescente() {
-//        Leilao bolo = new Leilao("bolo de chocolate");
-//        bolo.propoe(new Lance(new Usuario("Livia"), 15.0));
-//        bolo.propoe(new Lance(new Usuario("Tilia"), 10.0));
-//        double maiorValorDevolvido = bolo.getMaiorLance();
-//        assertEquals(15.0, maiorValorDevolvido, DELTA);
-//    }
-
     @Test
     public void deve_DevolverMenorLance_QuandoRecebeUnicoLance() {
         Leilao brigadeiro = new Leilao("brigadeiro");
         brigadeiro.propoe(new Lance(new Usuario("Tilia"), 5.0));
         double menorLanceDevolvido = brigadeiro.getMenorLance();
         assertEquals(5.0, menorLanceDevolvido, DELTA);
+
+
     }
 
     @Test
@@ -93,9 +103,9 @@ public class LeilaoTest {
     @Test
     public void deve_DevolverTresMaioresLances_QuandoRecebeTresLances() {
         Leilao cheesecake = new Leilao("cheesecake");
-        cheesecake.propoe(new Lance(new Usuario("Fofa"), 500.0));
+        cheesecake.propoe(new Lance(new Usuario("Fofa"), 400.0));
         cheesecake.propoe(new Lance(new Usuario("Genja"), 450.0));
-        cheesecake.propoe(new Lance(new Usuario("Genja"), 480.0));
+        cheesecake.propoe(new Lance(new Usuario("Genje"), 480.0));
 
         List<Lance> tresMaioresLancesDevolvidos = cheesecake.tresMaioresLances();
 
@@ -103,9 +113,9 @@ public class LeilaoTest {
         assertEquals(3, tresMaioresLancesDevolvidos.size());
 
         //verificando o valor que se encontra em cada índice da lista levando em considereção que deve ser em ordem decrescente
-        assertEquals(500.0, tresMaioresLancesDevolvidos.get(0).getValor(), DELTA);
-        assertEquals(480.0, tresMaioresLancesDevolvidos.get(1).getValor(), DELTA);
-        assertEquals(450.0, tresMaioresLancesDevolvidos.get(2).getValor(), DELTA);
+        assertEquals(480.0, tresMaioresLancesDevolvidos.get(0).getValor(), DELTA);
+        assertEquals(450.0, tresMaioresLancesDevolvidos.get(1).getValor(), DELTA);
+        assertEquals(400.0, tresMaioresLancesDevolvidos.get(2).getValor(), DELTA);
 
     }
 
@@ -130,29 +140,29 @@ public class LeilaoTest {
     public void deve_DevolverTresMaioresLances_QuandoRecebeApenasDoisLances() {
         Leilao bolo = new Leilao("bolo de chocolate");
         bolo.propoe(new Lance(new Usuario("Livia"), 15.0));
-        bolo.propoe(new Lance(new Usuario("Tilia"), 10.0));
+        bolo.propoe(new Lance(new Usuario("Tilia"), 18.0));
 
         List<Lance> lancesDevolvidos = bolo.tresMaioresLances();
         assertEquals(2, lancesDevolvidos.size());
-        assertEquals(15.0, lancesDevolvidos.get(0).getValor(), DELTA);
-        assertEquals(10.0, lancesDevolvidos.get(1).getValor(), DELTA);
+        assertEquals(18.0, lancesDevolvidos.get(0).getValor(), DELTA);
+        assertEquals(15.0, lancesDevolvidos.get(1).getValor(), DELTA);
     }
 
     @Test
     public void deve_DevolverTresMaioresLances_QuandoRecebeMaisDeTresLances() {
         Leilao bolo = new Leilao("bolo de chocolate");
         bolo.propoe(new Lance(new Usuario("Livia"), 15.0));
-        bolo.propoe(new Lance(new Usuario("Tilia"), 10.0));
-        bolo.propoe(new Lance(new Usuario("Dude"), 12.0));
-        bolo.propoe(new Lance(new Usuario("Rapha"), 17.0));
-        bolo.propoe(new Lance(new Usuario("Milaide"), 18.0));
+        bolo.propoe(new Lance(new Usuario("Tilia"), 16.0));
+        bolo.propoe(new Lance(new Usuario("Dude"), 17.0));
+        bolo.propoe(new Lance(new Usuario("Rapha"), 18.0));
+        bolo.propoe(new Lance(new Usuario("Milaide"), 19.0));
 
         final List<Lance> lancesDevolvidos = bolo.tresMaioresLances();
 
         assertEquals(3, lancesDevolvidos.size());
-        assertEquals(18.0, lancesDevolvidos.get(0).getValor(), DELTA);
-        assertEquals(17.0, lancesDevolvidos.get(1).getValor(), DELTA);
-        assertEquals(15.0, lancesDevolvidos.get(2).getValor(), DELTA);
+        assertEquals(19.0, lancesDevolvidos.get(0).getValor(), DELTA);
+        assertEquals(18.0, lancesDevolvidos.get(1).getValor(), DELTA);
+        assertEquals(17.0, lancesDevolvidos.get(2).getValor(), DELTA);
     }
 
     @Test
@@ -167,28 +177,32 @@ public class LeilaoTest {
         assertEquals(0.0, menorLanceDevolvido, DELTA);
     }
 
+//    @Test
+//    public void naoDeve_AdcionarLance_QuandoForMenorQueMaiorLance() {
+//        SONHO.propoe(new Lance(new Usuario("Milaide"), 38.0));
+//        SONHO.propoe(new Lance(new Usuario("Due"), 28.0));
+//
+//        int quantidadeDevolvida = SONHO.quantidadeLances();
+//        assertEquals(1, quantidadeDevolvida);
+
+
     @Test
     public void naoDeve_AdcionarLance_QuandoForMenorQueMaiorLance() {
+        exception.expect(LanceMenorQueUltimoLanceException.class);
         SONHO.propoe(new Lance(new Usuario("Milaide"), 38.0));
-        SONHO.propoe(new Lance(new Usuario("Due"), 28.0));
-
-        int quantidadeDevolvida = SONHO.quantidadeLances();
-        assertEquals(1, quantidadeDevolvida);
+        SONHO.propoe(new Lance(new Usuario("Due"), 8.0));
     }
 
     @Test
-    public void naoDeve_AdicionarLance_QuandoForOMesmoUsuarioDoUltimoLance(){
+    public void naoDeve_AdicionarLance_QuandoForOMesmoUsuarioDoUltimoLance() {
+        exception.expect(LanceSeguidoDoMesmoUsuarioException.class);
         Usuario Milaide = new Usuario("Milaide");
-        SONHO.propoe(new Lance(Milaide, 38.0));
-        SONHO.propoe(new Lance(new Usuario("Milaide"), 38.0));
-
-        int quantidadeDeLances = SONHO.quantidadeLances();
-
-        assertEquals(1, quantidadeDeLances);
+        SONHO.propoe(new Lance(Milaide, 380.0));
+        SONHO.propoe(new Lance(Milaide, 400.0));
     }
 
-    @Test
-    public void naoDeve_AdicionarLance_QuandoUsuarioDerCincoLances(){
+    @Test(expected = UsuarioJaDeuCincoLancesException.class)
+    public void naoDeve_AdicionarLance_QuandoUsuarioDerCincoLances() {
         SONHO.propoe(new Lance(new Usuario("Milaide"), 100.0));
         SONHO.propoe(new Lance(new Usuario("Junio"), 200.0));
         SONHO.propoe(new Lance(new Usuario("Milaide"), 300.0));
@@ -200,13 +214,6 @@ public class LeilaoTest {
         SONHO.propoe(new Lance(new Usuario("Milaide"), 900.0));
         SONHO.propoe(new Lance(new Usuario("Junio"), 1000.0));
         SONHO.propoe(new Lance(new Usuario("Milaide"), 1100.0));
-        SONHO.propoe(new Lance(new Usuario("Junio"), 1200.0));
-
-        int quantidadeDeLances = SONHO.quantidadeLances();
-
-        assertEquals(10, quantidadeDeLances);
-
-
     }
 
 }
